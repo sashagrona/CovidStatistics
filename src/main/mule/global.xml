@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns:cassandra-db="http://www.mulesoft.org/schema/mule/cassandra-db" xmlns:kafka="http://www.mulesoft.org/schema/mule/kafka" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/kafka http://www.mulesoft.org/schema/mule/kafka/current/mule-kafka.xsd
+http://www.mulesoft.org/schema/mule/cassandra-db http://www.mulesoft.org/schema/mule/cassandra-db/current/mule-cassandra-db.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<kafka:producer-config name="Apache_Kafka_Producer_configuration" doc:name="Apache Kafka Producer configuration" doc:id="cedaf5b5-6c56-41df-a20c-5099963a349b" >
+		<kafka:producer-plaintext-connection>
+			<kafka:bootstrap-servers >
+				<kafka:bootstrap-server value="${kafka.bootstrapServers}" />
+			</kafka:bootstrap-servers>
+		</kafka:producer-plaintext-connection>
+	</kafka:producer-config>
+	<cassandra-db:config name="CassandraDB_Config" doc:name="CassandraDB Config" doc:id="65b55f58-0d3c-4780-9e2b-dd338243fb80" >
+		<cassandra-db:connection host="${cassandra.host}" port="${cassandra.port}" username="${cassandra.username}" password="${secure::cassandra.password}" clusterName="${cassandra.cluster}" clusterNodes="${cassandra.nodes}"/>
+	</cassandra-db:config>
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="b8bc18c1-db77-4bd5-a9da-2b478063dc29" file="${env}-config.yaml" key="${security-key}" />
+	<global-property doc:name="Global Property" doc:id="cbd788e4-086b-4811-9dc3-a00f43232c83" name="security-key" value="secret-key123456" />
+	<global-property doc:name="Global Property" doc:id="f038020c-dd66-4bf6-aa29-838bddef7cb8" name="env" value="dev" />
+	<configuration-properties doc:name="Configuration properties" doc:id="019eee23-7549-4a7c-a621-1367f241d606" file="${env}-config.yaml" />
+	<os:config name="ObjectStore_Config" doc:name="ObjectStore Config" doc:id="98c95acd-cc57-4728-8c42-cd61dd4eef59" >
+		<os:connection />
+	</os:config>
+	<http:request-config name="HTTP_Request_covid" doc:name="HTTP Request configuration" doc:id="f0830f79-3130-456d-a0f4-27a455721859" basePath="/v2/">
+		<http:request-connection host="${covid.host}" port="${covid.port}" connectionIdleTimeout="${covid.timeout}"/>
+	</http:request-config>
+	<kafka:consumer-config name="Apache_Kafka_Consumer_configuration" doc:name="Apache Kafka Consumer configuration" doc:id="7d8c2047-77bc-448e-99f1-1597c00abe92" >
+		<kafka:consumer-plaintext-connection >
+			<kafka:bootstrap-servers >
+				<kafka:bootstrap-server value="${kafka.bootstrapServers}" />
+			</kafka:bootstrap-servers>
+			<kafka:topic-patterns >
+				<kafka:topic-pattern value="${kafka.topic}" />
+			</kafka:topic-patterns>
+		</kafka:consumer-plaintext-connection>
+	</kafka:consumer-config>
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="08f8b279-080e-46a8-ad03-50d8dfecbfb5" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+</mule>

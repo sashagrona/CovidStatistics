@@ -1,0 +1,205 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="covid_input" format="json">
+      <types:shape format="weave" example="examples/covid_response.json"><![CDATA[%dw 2.0
+
+type covid_input = {|
+  cases: {|
+    "4/15/20": Number {"typeId": "int"}, 
+    "4/16/20": Number {"typeId": "int"}, 
+    "4/17/20": Number {"typeId": "int"}, 
+    "4/18/20": Number {"typeId": "int"}, 
+    "4/19/20": Number {"typeId": "int"}, 
+    "4/20/20": Number {"typeId": "int"}, 
+    "4/21/20": Number {"typeId": "int"}, 
+    "4/22/20": Number {"typeId": "int"}, 
+    "4/23/20": Number {"typeId": "int"}, 
+    "4/24/20": Number {"typeId": "int"}, 
+    "4/25/20": Number {"typeId": "int"}, 
+    "4/26/20": Number {"typeId": "int"}, 
+    "4/27/20": Number {"typeId": "int"}, 
+    "4/28/20": Number {"typeId": "int"}, 
+    "4/29/20": Number {"typeId": "int"}, 
+    "4/30/20": Number {"typeId": "int"}, 
+    "5/1/20": Number {"typeId": "int"}, 
+    "5/2/20": Number {"typeId": "int"}, 
+    "5/3/20": Number {"typeId": "int"}, 
+    "5/4/20": Number {"typeId": "int"}, 
+    "5/5/20": Number {"typeId": "int"}, 
+    "5/6/20": Number {"typeId": "int"}, 
+    "5/7/20": Number {"typeId": "int"}, 
+    "5/8/20": Number {"typeId": "int"}, 
+    "5/9/20": Number {"typeId": "int"}, 
+    "5/10/20": Number {"typeId": "int"}, 
+    "5/11/20": Number {"typeId": "int"}, 
+    "5/12/20": Number {"typeId": "int"}, 
+    "5/13/20": Number {"typeId": "int"}, 
+    "5/14/20": Number {"typeId": "int"}
+  |}, 
+  deaths: {|
+    "4/15/20": Number {"typeId": "int"}, 
+    "4/16/20": Number {"typeId": "int"}, 
+    "4/17/20": Number {"typeId": "int"}, 
+    "4/18/20": Number {"typeId": "int"}, 
+    "4/19/20": Number {"typeId": "int"}, 
+    "4/20/20": Number {"typeId": "int"}, 
+    "4/21/20": Number {"typeId": "int"}, 
+    "4/22/20": Number {"typeId": "int"}, 
+    "4/23/20": Number {"typeId": "int"}, 
+    "4/24/20": Number {"typeId": "int"}, 
+    "4/25/20": Number {"typeId": "int"}, 
+    "4/26/20": Number {"typeId": "int"}, 
+    "4/27/20": Number {"typeId": "int"}, 
+    "4/28/20": Number {"typeId": "int"}, 
+    "4/29/20": Number {"typeId": "int"}, 
+    "4/30/20": Number {"typeId": "int"}, 
+    "5/1/20": Number {"typeId": "int"}, 
+    "5/2/20": Number {"typeId": "int"}, 
+    "5/3/20": Number {"typeId": "int"}, 
+    "5/4/20": Number {"typeId": "int"}, 
+    "5/5/20": Number {"typeId": "int"}, 
+    "5/6/20": Number {"typeId": "int"}, 
+    "5/7/20": Number {"typeId": "int"}, 
+    "5/8/20": Number {"typeId": "int"}, 
+    "5/9/20": Number {"typeId": "int"}, 
+    "5/10/20": Number {"typeId": "int"}, 
+    "5/11/20": Number {"typeId": "int"}, 
+    "5/12/20": Number {"typeId": "int"}, 
+    "5/13/20": Number {"typeId": "int"}, 
+    "5/14/20": Number {"typeId": "int"}
+  |}, 
+  recovered: {|
+    "4/15/20": Number {"typeId": "int"}, 
+    "4/16/20": Number {"typeId": "int"}, 
+    "4/17/20": Number {"typeId": "int"}, 
+    "4/18/20": Number {"typeId": "int"}, 
+    "4/19/20": Number {"typeId": "int"}, 
+    "4/20/20": Number {"typeId": "int"}, 
+    "4/21/20": Number {"typeId": "int"}, 
+    "4/22/20": Number {"typeId": "int"}, 
+    "4/23/20": Number {"typeId": "int"}, 
+    "4/24/20": Number {"typeId": "int"}, 
+    "4/25/20": Number {"typeId": "int"}, 
+    "4/26/20": Number {"typeId": "int"}, 
+    "4/27/20": Number {"typeId": "int"}, 
+    "4/28/20": Number {"typeId": "int"}, 
+    "4/29/20": Number {"typeId": "int"}, 
+    "4/30/20": Number {"typeId": "int"}, 
+    "5/1/20": Number {"typeId": "int"}, 
+    "5/2/20": Number {"typeId": "int"}, 
+    "5/3/20": Number {"typeId": "int"}, 
+    "5/4/20": Number {"typeId": "int"}, 
+    "5/5/20": Number {"typeId": "int"}, 
+    "5/6/20": Number {"typeId": "int"}, 
+    "5/7/20": Number {"typeId": "int"}, 
+    "5/8/20": Number {"typeId": "int"}, 
+    "5/9/20": Number {"typeId": "int"}, 
+    "5/10/20": Number {"typeId": "int"}, 
+    "5/11/20": Number {"typeId": "int"}, 
+    "5/12/20": Number {"typeId": "int"}, 
+    "5/13/20": Number {"typeId": "int"}, 
+    "5/14/20": Number {"typeId": "int"}
+  |}
+|} {"example": "{\\\"cases\\\":{\\\"4\\/15\\/20\\\":2055424,\\\"4\\/16\\/20\\\":2151792,\\\"4\\/17\\/20\\\":2239634,\\\"4\\/18\\/20\\\":2317243,\\\"4\\/19\\/20\\\":2400787,\\\"4\\/20\\/20\\\":2471727,\\\"4\\/21\\/20\\\":2549046,\\\"4\\/22\\/20\\\":2624608,\\\"4\\/23\\/20\\\":2708403,\\\"4\\/24\\/20\\\":2795731,\\\"4\\/25\\/20\\\":2881140,\\\"4\\/26\\/20\\\":2955033,\\\"4\\/27\\/20\\\":3023722,\\\"4\\/28\\/20\\\":3097229,\\\"4\\/29\\/20\\\":3172287,\\\"4\\/30\\/20\\\":3256910,\\\"5\\/1\\/20\\\":3345558,\\\"5\\/2\\/20\\\":3427584,\\\"5\\/3\\/20\\\":3506729,\\\"5\\/4\\/20\\\":3583055,\\\"5\\/5\\/20\\\":3662691,\\\"5\\/6\\/20\\\":3756069,\\\"5\\/7\\/20\\\":3845718,\\\"5\\/8\\/20\\\":3938064,\\\"5\\/9\\/20\\\":4024009,\\\"5\\/10\\/20\\\":4101699,\\\"5\\/11\\/20\\\":4177502,\\\"5\\/12\\/20\\\":4261747,\\\"5\\/13\\/20\\\":4347018,\\\"5\\/14\\/20\\\":4442163},\\\"deaths\\\":{\\\"4\\/15\\/20\\\":140659,\\\"4\\/16\\/20\\\":147946,\\\"4\\/17\\/20\\\":156804,\\\"4\\/18\\/20\\\":163214,\\\"4\\/19\\/20\\\":167772,\\\"4\\/20\\/20\\\":173097,\\\"4\\/21\\/20\\\":180236,\\\"4\\/22\\/20\\\":186912,\\\"4\\/23\\/20\\\":193665,\\\"4\\/24\\/20\\\":199997,\\\"4\\/25\\/20\\\":206187,\\\"4\\/26\\/20\\\":209900,\\\"4\\/27\\/20\\\":214444,\\\"4\\/28\\/20\\\":220801,\\\"4\\/29\\/20\\\":227665,\\\"4\\/30\\/20\\\":233360,\\\"5\\/1\\/20\\\":238619,\\\"5\\/2\\/20\\\":243813,\\\"5\\/3\\/20\\\":247470,\\\"5\\/4\\/20\\\":251537,\\\"5\\/5\\/20\\\":257239,\\\"5\\/6\\/20\\\":263855,\\\"5\\/7\\/20\\\":269567,\\\"5\\/8\\/20\\\":274898,\\\"5\\/9\\/20\\\":279311,\\\"5\\/10\\/20\\\":282709,\\\"5\\/11\\/20\\\":286330,\\\"5\\/12\\/20\\\":291942,\\\"5\\/13\\/20\\\":297197,\\\"5\\/14\\/20\\\":302418},\\\"recovered\\\":{\\\"4\\/15\\/20\\\":501550,\\\"4\\/16\\/20\\\":531894,\\\"4\\/17\\/20\\\":557220,\\\"4\\/18\\/20\\\":580755,\\\"4\\/19\\/20\\\":611460,\\\"4\\/20\\/20\\\":632765,\\\"4\\/21\\/20\\\":666717,\\\"4\\/22\\/20\\\":695592,\\\"4\\/23\\/20\\\":724219,\\\"4\\/24\\/20\\\":774436,\\\"4\\/25\\/20\\\":801392,\\\"4\\/26\\/20\\\":829102,\\\"4\\/27\\/20\\\":855409,\\\"4\\/28\\/20\\\":887724,\\\"4\\/29\\/20\\\":928098,\\\"4\\/30\\/20\\\":992462,\\\"5\\/1\\/20\\\":1029651,\\\"5\\/2\\/20\\\":1069323,\\\"5\\/3\\/20\\\":1100315,\\\"5\\/4\\/20\\\":1136694,\\\"5\\/5\\/20\\\":1171826,\\\"5\\/6\\/20\\\":1217229,\\\"5\\/7\\/20\\\":1255481,\\\"5\\/8\\/20\\\":1291811,\\\"5\\/9\\/20\\\":1344362,\\\"5\\/10\\/20\\\":1376871,\\\"5\\/11\\/20\\\":1423202,\\\"5\\/12\\/20\\\":1459359,\\\"5\\/13\\/20\\\":1513370,\\\"5\\/14\\/20\\\":1551789}}"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="covid_output" format="json">
+      <types:shape format="weave" example="examples/covid_output.json"><![CDATA[%dw 2.0
+
+type covid_output = Array<{|  date: String,   cases: {|    total: Number {"typeId": "int"},     new: Number {"typeId": "int"}  |},   deaths: {|    total: Number {"typeId": "int"},     new: Number {"typeId": "int"}  |},   recovered: {|    total: Number {"typeId": "int"},     new: Number {"typeId": "int"}  |}|}> {"example": "[{\\\"date\\\":\\\"2020-04-15\\\",\\\"cases\\\":{\\\"total\\\":2055424,\\\"new\\\":2055424},\\\"deaths\\\":{\\\"total\\\":140659,\\\"new\\\":140659},\\\"recovered\\\":{\\\"total\\\":501550,\\\"new\\\":501550}},{\\\"date\\\":\\\"2020-04-16\\\",\\\"cases\\\":{\\\"total\\\":2151792,\\\"new\\\":96368},\\\"deaths\\\":{\\\"total\\\":147946,\\\"new\\\":7287},\\\"recovered\\\":{\\\"total\\\":531894,\\\"new\\\":30344}}]"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="unit" format="json">
+      <types:shape format="weave" example="examples/covid_unit.json"><![CDATA[%dw 2.0
+
+type unit = {|
+  "2020-04-15": {|
+    cases: {|
+      total: Number {"typeId": "int"}, 
+      new: Number {"typeId": "int"}
+    |}, 
+    deaths: {|
+      total: Number {"typeId": "int"}, 
+      new: Number {"typeId": "int"}
+    |}, 
+    recovered: {|
+      total: Number {"typeId": "int"}, 
+      new: Number {"typeId": "int"}
+    |}
+  |}
+|} {"example": "{\\\"2020-04-15\\\":{\\\"cases\\\":{\\\"total\\\":2055424,\\\"new\\\":2055424},\\\"deaths\\\":{\\\"total\\\":140659,\\\"new\\\":140659},\\\"recovered\\\":{\\\"total\\\":501550,\\\"new\\\":501550}}}"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="new_case" format="json">
+      <types:shape format="weave" example="examples/new_data.json"><![CDATA[%dw 2.0
+
+type new_case = Array<{|  cases: Number {"typeId": "int"},   deaths: Number {"typeId": "int"},   recovered: Number {"typeId": "int"}|}> {"example": "[{\\\"cases\\\":333,\\\"deaths\\\":333,\\\"recovered\\\":333},{\\\"cases\\\":444,\\\"deaths\\\":444,\\\"recovered\\\":444}]"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#97abb947-9432-4262-b731-42093f5f9916">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="covid_input"/>
+        </types:message>
+      </types:input-event>
+      <types:output-event>
+        <types:message>
+          <types:payload type="covid_output"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#e33c8f62-327e-4e0c-b06a-974d43b6f62d">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="covid_input"/>
+        </types:message>
+      </types:input-event>
+      <types:output-event>
+        <types:message>
+          <types:payload type="new_case"/>
+        </types:message>
+        <types:variables>
+          <types:variable name="newData" type="new_case"/>
+        </types:variables>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#ac10a90e-4218-4d81-840c-4d9cdee11008">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="unit"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#19eb9c18-4a3b-4357-814f-13588645e5ff">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="covid_output"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#15f21f2c-9dcc-4b19-aced-38d1a4a20128">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="covid_input"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#2e279ee3-5d45-478d-80e7-b39303fee6a9"/>
+  <types:enrichment select="#6fc0c9d4-af43-4556-bae1-be8918fd413d"/>
+</types:mule>

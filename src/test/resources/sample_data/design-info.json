@@ -1,0 +1,17 @@
+{
+  "sampleData": {
+    "97abb947-9432-4262-b731-42093f5f9916": {},
+    "4a97a26a-6585-4798-8873-eab1b14bff39": {
+      "payload": "sample_data/list_json.json"
+    },
+    "e33c8f62-327e-4e0c-b06a-974d43b6f62d": {
+      "payload": "sample_data/json.json"
+    },
+    "19eb9c18-4a3b-4357-814f-13588645e5ff": {
+      "payload": "sample_data/list_json_1.json"
+    },
+    "15f21f2c-9dcc-4b19-aced-38d1a4a20128": {
+      "payload": "sample_data/json_1.json"
+    }
+  }
+}
