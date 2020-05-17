@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:kafka="http://www.mulesoft.org/schema/mule/kafka"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/kafka http://www.mulesoft.org/schema/mule/kafka/current/mule-kafka.xsd
+http://www.mulesoft.org/schema/mule/cassandra-db http://www.mulesoft.org/schema/mule/cassandra-db/current/mule-cassandra-db.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">>
+	<os:object-store name="Object_store" doc:name="Object store" doc:id="8c172afe-be15-4b64-9a9f-d105d573177b" config-ref="ObjectStore_Config" />
+	<flow name="prc-to-kafka.prepare-data" doc:id="54f47a70-3ffd-4173-9ff8-310e4113ad86">
+		<http:request method="GET" doc:name="Request" doc:id="e17dd265-c067-4138-9ea1-f2b6c9c9665e" config-ref="HTTP_Request_covid" path="/historical/{country}" responseTimeout="${covid.timeout}">
+			<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	"country" : vars.country
+}]]]></http:uri-params>
+			<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"lastdays" : vars.lastDays as Number + 1
+}]]]></http:query-params>
+		</http:request>
+		<os:retrieve doc:name="Retrieve" doc:id="73ffb174-90dd-4930-a8ef-0e2b5584230c" key="watermark" objectStore="Object_store" target="watermark">
+			<os:default-value ><![CDATA[#[[]]]]></os:default-value>
+		</os:retrieve>
+		<ee:transform doc:name="Set data" doc:id="1d555140-1eac-4f73-b366-19e05619a4b7">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+fun removeFirst(object) = object filterObject((value, key, index) -> index > 0)
+
+---
+{
+	cases: removeFirst(payload.timeline.cases),
+	deaths: removeFirst(payload.timeline.deaths),
+	recovered: removeFirst(payload.timeline.recovered)
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="newData"><![CDATA[%dw 2.0
+output application/json
+import * from dw::core::Objects
+var size = sizeOf(payload.timeline.cases)
+var cases = valueSet(payload.timeline.cases)
+var deaths = valueSet(payload.timeline.deaths)
+var recovered = valueSet(payload.timeline.recovered)
+---
+1 to size-1 map{
+	cases: cases[$$+1] - cases[$$],
+	deaths: deaths[$$+1] - deaths[$$],
+	recovered: recovered[$$+1] - recovered[$$]
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<ee:transform doc:name="Prepare message for user" doc:id="a103195d-d510-4e9d-8ac0-5b1fa30c127d">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+var convert = (date) -> date as String as Date{format: "M/d/yy"} as String{format: "y-MM-dd"}
+---
+payload.cases pluck(value, key, index) -> {
+		country: vars.country,
+		date: (convert(key)), 
+		cases: {
+			total: payload.cases[key],
+			new: vars.newData[index].cases
+		},
+		deaths: {
+			total: payload.deaths[key],
+			new: vars.newData[index].deaths
+		},
+		recovered: {
+			total: payload.recovered[key],
+			new: vars.newData[index].recovered
+		}
+	}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<flow-ref doc:name="prc-to-kafka.send-to-kafka" doc:id="0c90fcb3-8090-44fb-8bd5-7313defc037a" name="prc-to-kafka.send-to-kafka"/>
+		<flow-ref doc:name="prc-to-kafka.set-watermark" doc:id="d87473a1-a5ee-4118-a70f-7de99e273115" name="prc-to-kafka.set-watermark"/>
+	</flow>
+	<sub-flow name="prc-to-kafka.set-watermark" doc:id="a3848d85-f56f-4fc0-9895-2c1455ae2f87" >
+		<ee:transform doc:name="Set watermark" doc:id="3f6a93ec-58e2-4c79-a7bd-c9b211855edf">
+			<ee:message>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="watermark"><![CDATA[%dw 2.0
+output application/java
+import keySet from dw::core::Objects
+var new = {
+	country: vars.country,
+	date : payload[0].date
+}
+var elementInArr = (obj) -> (vars.watermark filter $.country == obj)[0]
+fun contains(obj) = if(isEmpty(elementInArr(obj))) false else true
+---
+if(contains(vars.country) and elementInArr(vars.country).date > new.date) 
+	(vars.watermark- elementInArr(vars.country)) << new
+else
+	(vars.watermark) << new
+]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<os:store doc:name="Store" doc:id="ef23884f-0afc-4141-9768-48b6741699b8" key="watermark" objectStore="Object_store">
+			<os:value><![CDATA[#[vars.watermark]]]></os:value>
+		</os:store>
+	</sub-flow>
+	<sub-flow name="prc-to-kafka.send-to-kafka" doc:id="36fae7f7-80ea-40b8-887c-e6b30cd8cf39" >
+		<ee:transform doc:name="Prepare message for Kafka" doc:id="7d2f81c6-c296-4486-bed3-848910afedb5">
+			<ee:message>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="message"><![CDATA[%dw 2.0
+output application/json
+import * from dw::core::Arrays
+var element = vars.watermark filter $.country == vars.country
+var indexDate = if(!isEmpty(element)) indexOf(vars.watermark, vars.country) else null
+---
+if(indexDate != null) payload filter $.date < vars.watermark[indexDate].date else payload]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<foreach doc:name="For Each" doc:id="a895ae50-9ac2-4410-b439-51979a98823e" collection="#[vars.message]">
+			<kafka:publish doc:name="Publish" doc:id="468c636e-4015-439e-826e-fe6e2f348274" config-ref="Apache_Kafka_Producer_configuration" topic="${kafka.topic}" partition="0" key="#[now()]" />
+			<logger level="INFO" doc:name="Logger" doc:id="c9a24c80-94f8-42cd-b911-a35da16421a6" />
+		</foreach>
+	</sub-flow>
+	</mule>

@@ -41,7 +41,7 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 		</kafka:consumer-plaintext-connection>
 	</kafka:consumer-config>
 	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="08f8b279-080e-46a8-ad03-50d8dfecbfb5" >
-		<http:listener-connection host="0.0.0.0" port="8081" />
+		<http:listener-connection host="${http.host}" port="${http.port}" />
 	</http:listener-config>
 	<sub-flow name="global.get-tracking-id" doc:id="44e7a01b-ad61-4599-aaf8-59944172d289" >
 		<set-variable doc:name="Set Variable" doc:id="16f555ee-f2bc-49f3-a567-860781270c4e" variableName="trackingId" value="#[if (attributes.headers['x-transaction-id'] != null) attributes.headers['x-transaction-id'] 

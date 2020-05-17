@@ -1,3 +1,20 @@
+api:
+  name: "Сovid-API"
+  version: "v1"
+  application:
+    name: "covid-api"
+  console:
+    enabled: "started" #stopped  
+  autodiscovery:
+    name: ""
+    version: ""
+
+http:
+  host: "localhost"
+  port: "8081"
+  path: "/${api.application.name}/api/${api.version}/*"
+  timeout: "30000"
+  
 covid:
   host: "disease.sh"
   port: "80"

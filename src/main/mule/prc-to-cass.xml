@@ -1,77 +1,79 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
-	xmlns:cassandra-db="http://www.mulesoft.org/schema/mule/cassandra-db"
-	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
-http://www.mulesoft.org/schema/mule/cassandra-db http://www.mulesoft.org/schema/mule/cassandra-db/current/mule-cassandra-db.xsd
+<mule xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:cassandra-db="http://www.mulesoft.org/schema/mule/cassandra-db"
+	xmlns:kafka="http://www.mulesoft.org/schema/mule/kafka"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/kafka http://www.mulesoft.org/schema/mule/kafka/current/mule-kafka.xsd
+http://www.mulesoft.org/schema/mule/cassandra-db http://www.mulesoft.org/schema/mule/cassandra-db/current/mule-cassandra-db.xsd
 http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
-	<os:object-store name="Object_store" doc:name="Object store" doc:id="9186ffce-4818-42b8-9184-8c936fba7989" config-ref="ObjectStore_Config" />
-	<flow name="prc-to-cass.create-keyspace" doc:id="fcf053fa-8ee5-4059-b691-c0e02aa0f16f" >
-		<set-variable value="#[output application/java
+	<flow name="prc-to-cass.insert-data" doc:id="fea2e817-2c86-4a62-a239-7863a06c50ae">
+		<kafka:message-listener doc:name="Message listener" doc:id="d67fa252-a714-4f50-bd98-c9d3bad3bd44" config-ref="Apache_Kafka_Consumer_configuration"/>
+		<set-payload value="#[payload]" doc:name="Set Payload" doc:id="c44d30d7-4f77-464a-8c33-4f928dd640dc" mimeType="application/json"/>
+		<ee:transform doc:name="Prepare payload for INSERT" doc:id="ac10a90e-4218-4d81-840c-4d9cdee11008">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
 ---
 {
-	keyspaceName : p('cassandra.keyspace'),
-	replicationFactor: p('cassandra.replication_factor'),
-	replicationStrategyClass: 'SimpleStrategy'
-}]" doc:name="Set CQLInput" doc:id="31b4b69d-7cf4-4005-abd5-9aa0a610f99d" variableName="cqlInput"/>
-		<cassandra-db:create-keyspace doc:name="Create keyspace" doc:id="0fd6a303-4121-46f6-a217-0cd23de0d025" config-ref="CassandraDB_Config">
-			<cassandra-db:input ><![CDATA[#[vars.cqlInput]]]></cassandra-db:input>
-		</cassandra-db:create-keyspace>
-		<os:store doc:name="Store" doc:id="16042736-0f4f-4fce-9409-25558369777a" key="created" objectStore="Object_store">
-			<os:value ><![CDATA[#[true]]]></os:value>
-		</os:store>
-		<flow-ref doc:name="prc-to-cass.create-column-familly" doc:id="b662825e-182c-45d7-908e-662c15d40fb4" name="prc-to-cass.create-column-familly"/>
-	</flow>
-	<sub-flow name="prc-to-cass.create-column-familly" doc:id="380dbb8a-aa1f-43b4-8055-eb76da2a43c0" >
-		<cassandra-db:create-table doc:name="Create table" doc:id="e62a52fb-0d1b-462a-9191-ad122c6b2b6b" config-ref="CassandraDB_Config">
-			<cassandra-db:create-table-input ><![CDATA[#[output application/java
----
-{
-	columns: [
-		
-	{
-		name: "date_id",
-		primaryKey: true,
-		'type': 'TIMESTAMP'
+	country: payload.country,
+	date: payload.date,
+	cases: {
+		total: payload.cases.total,
+		new: payload.cases.new
 	},
-	{
-		name: "cases",
-		primaryKey: false,
-		'type': 'TEXT'
+	deaths: {
+		total: payload.deaths.total,
+		new: payload.deaths.new
 	},
-	{
-		name: "deaths",
-		primaryKey: false,
-		'type': 'TEXT'
-	},
-	{
-		name: "recovered",
-		primaryKey: false,
-		'type': 'TEXT'
-	}],
-	keyspaceName: p('cassandra.keyspace'),
-	tableName: 'statistics'
-}]]]></cassandra-db:create-table-input>
-		</cassandra-db:create-table>
-		<logger level="INFO" doc:name="Logger" doc:id="df1b246c-b5a8-45f1-815f-e72704675ae5" />
-	</sub-flow>
-	<flow name="prc-to-cassFlow" doc:id="15b9e895-e701-4e5d-b3a8-5f48e6c82b0e" initialState="stopped">
-		<scheduler doc:name="Scheduler" doc:id="1e874b1a-7857-45ee-ad57-e4297d24d9e8" >
-			<scheduling-strategy >
-				<fixed-frequency />
-			</scheduling-strategy>
-		</scheduler>
-		<os:retrieve doc:name="Retrieve" doc:id="5afd0e99-44e3-42de-8978-febb471b9892" key="created" objectStore="Object_store" target="created">
-			<os:default-value ><![CDATA[false]]></os:default-value>
-		</os:retrieve>
-		<ee:transform doc:name="Transform Message" doc:id="d82735c5-5943-4ec8-9a01-b8d91333608f" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
-output application/java
----
-if(!vars.created) lookup("prc-to-cass.create-keyspace", payload) else null]]></ee:set-payload>
+	recovered: {
+		total: payload.recovered.total,
+		new: payload.recovered.new
+	}
+}]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
+		<cassandra-db:insert doc:name="Insert" doc:id="32b2e3af-b727-4e32-8a51-2cd52fe18188" config-ref="CassandraDB_Config" keyspaceName="${cassandra.keyspace}" table="statistics"/>
+		<logger level="INFO" doc:name="Logger" doc:id="2a84c4a1-42bc-445d-8ee9-2ef84fff9e84" />
+	</flow>
+	<flow name="prc-to-cass.get-data" doc:id="32d93761-ceeb-4db8-bedc-e6ad3f2c0756" >
+		<ee:transform doc:name="Set vars" doc:id="2e279ee3-5d45-478d-80e7-b39303fee6a9" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="country" ><![CDATA[output application/java
+---
+attributes.queryParams.country]]></ee:set-variable>
+				<ee:set-variable variableName="lastDate" ><![CDATA[output application/java
+var lastDays = attributes.queryParams.lastDays default 90
+---
+(now() - ("P$(lastDays)D" as Period)) as Date as String]]></ee:set-variable>
+				<ee:set-variable variableName="lastDays" ><![CDATA[%dw 2.0
+output application/java
+---
+attributes.queryParams.lastDays as Number default 90]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<set-variable value='#[{
+	query: "SELECT * FROM covid.statistics WHERE country = ? AND date &gt;= ?",
+	parameters: [vars.country, vars.lastDate]
+}]' doc:name="Set Variable" doc:id="ff0d33b1-c85f-4ccf-8a2f-99a9790fe89e" variableName="dynamicQuery"/>
+		<cassandra-db:select doc:name="Select" doc:id="bf7b9531-c26a-4b1e-bf5f-4ca9fe51732e" config-ref="CassandraDB_Config" parameters="#[vars.dynamicQuery.parameters]">
+			<cassandra-db:query ><![CDATA[#[vars.dynamicQuery.query]]]></cassandra-db:query>
+		</cassandra-db:select>
+		<ee:transform doc:name="Transform Message" doc:id="19eb9c18-4a3b-4357-814f-13588645e5ff" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var size = sizeOf(payload)
+---
+if (size == 0 or size != vars.lastDays) 
+	lookup('prc-to-kafka.prepare-data', payload) 
+else
+	payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="b970b9f8-fdd3-42ff-b1c7-019bbace6fa3" />
 	</flow>
 </mule>

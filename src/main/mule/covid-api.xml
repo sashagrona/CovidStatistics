@@ -3,13 +3,13 @@
 	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd ">
     <apikit:config name="covid-api-config" api="covid-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
     <flow name="covid-api-main">
-        <http:listener config-ref="HTTP_Listener_config" path="/api/*">
+        <http:listener config-ref="HTTP_Listener_config" path="${http.path}">
             <http:response statusCode="#[vars.httpStatus default 200]">
-                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
             </http:response>
             <http:error-response statusCode="#[vars.httpStatus default 500]">
-                <http:body>#[payload]</http:body>
-                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
             </http:error-response>
         </http:listener>
         <flow-ref doc:name="global.get-tracking-id" doc:id="64220e5e-b71f-4839-b616-dd44576f472f" name="global.get-tracking-id"/>
@@ -161,45 +161,6 @@ output application/json
 		<flow-ref name="global.transform-to-json-api" doc:name="global.transform-to-json-api"/>
 	</flow>
     <flow name="get:\statistics:covid-api-config">
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="
-http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-[
-  {
-    date: 1586908800000,
-    cases: {
-      total: 2055424,
-      new: 2055424
-    },
-    deaths: {
-      total: 2055424,
-      new: 2055424
-    },
-    recovered: {
-      total: 2055424,
-      new: 2055424
-    }
-  }, 
-  {
-    date: 1586908800000,
-    cases: {
-      total: 2055424,
-      new: 2055424
-    },
-    deaths: {
-      total: 2055424,
-      new: 2055424
-    },
-    recovered: {
-      total: 2055424,
-      new: 2055424
-    }
-  }
-]]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
+		<flow-ref doc:name="prc-to-cass.get-data" doc:id="7ecc480a-0061-4793-acdc-1350ae2c8197" name="prc-to-cass.get-data"/>
     </flow>
 </mule>
