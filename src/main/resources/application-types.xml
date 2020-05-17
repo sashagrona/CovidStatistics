@@ -247,4 +247,13 @@ type new_case = Array<{|  cases: Number {"typeId": "int"},   deaths: Number {"ty
       </types:output-event>
     </types:processor-declaration>
   </types:enrichment>
+  <types:enrichment select="#6f32c520-fe7e-4909-87da-5283f574c427">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="covid_output"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
 </types:mule>

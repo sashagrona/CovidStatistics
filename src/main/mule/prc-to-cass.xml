@@ -46,7 +46,7 @@ output application/json
 var size = sizeOf(payload)
 ---
 if (size == 0 or size != vars.lastDays) 
-	lookup('prc-to-kafka.prepare-data', payload, 500000) 
+	lookup('prc-to-kafka.prepare-data', payload, 30000) 
 else
 	payload]]></ee:set-payload>
 			</ee:message>
