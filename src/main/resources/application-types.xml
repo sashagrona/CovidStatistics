@@ -182,15 +182,6 @@ type new_case = Array<{|  cases: Number {"typeId": "int"},   deaths: Number {"ty
       </types:input-event>
     </types:processor-declaration>
   </types:enrichment>
-  <types:enrichment select="#19eb9c18-4a3b-4357-814f-13588645e5ff">
-    <types:processor-declaration>
-      <types:input-event>
-        <types:message>
-          <types:payload type="covid_output"/>
-        </types:message>
-      </types:input-event>
-    </types:processor-declaration>
-  </types:enrichment>
   <types:enrichment select="#15f21f2c-9dcc-4b19-aced-38d1a4a20128">
     <types:processor-declaration>
       <types:input-event>
@@ -200,6 +191,15 @@ type new_case = Array<{|  cases: Number {"typeId": "int"},   deaths: Number {"ty
       </types:input-event>
     </types:processor-declaration>
   </types:enrichment>
-  <types:enrichment select="#2e279ee3-5d45-478d-80e7-b39303fee6a9"/>
   <types:enrichment select="#6fc0c9d4-af43-4556-bae1-be8918fd413d"/>
+  <types:enrichment select="#2e279ee3-5d45-478d-80e7-b39303fee6a9"/>
+  <types:enrichment select="#19eb9c18-4a3b-4357-814f-13588645e5ff">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="covid_output"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
 </types:mule>

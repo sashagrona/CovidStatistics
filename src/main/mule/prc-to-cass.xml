@@ -10,7 +10,7 @@ http://www.mulesoft.org/schema/mule/cassandra-db http://www.mulesoft.org/schema/
 http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
 	<flow name="prc-to-cass.insert-data" doc:id="fea2e817-2c86-4a62-a239-7863a06c50ae">
 		<kafka:message-listener doc:name="Message listener" doc:id="d67fa252-a714-4f50-bd98-c9d3bad3bd44" config-ref="Apache_Kafka_Consumer_configuration"/>
-		<set-payload value="#[payload]" doc:name="Set Payload" doc:id="c44d30d7-4f77-464a-8c33-4f928dd640dc" mimeType="application/json"/>
+		<set-payload value="#[payload]" doc:name="Set json MIME Type" doc:id="c44d30d7-4f77-464a-8c33-4f928dd640dc" mimeType="application/json"/>
 		<ee:transform doc:name="Prepare payload for INSERT" doc:id="ac10a90e-4218-4d81-840c-4d9cdee11008">
 			<ee:message>
 				<ee:set-payload><![CDATA[%dw 2.0
@@ -34,22 +34,22 @@ output application/json
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<cassandra-db:insert doc:name="Insert" doc:id="32b2e3af-b727-4e32-8a51-2cd52fe18188" config-ref="CassandraDB_Config" keyspaceName="${cassandra.keyspace}" table="statistics"/>
-		<logger level="INFO" doc:name="Logger" doc:id="2a84c4a1-42bc-445d-8ee9-2ef84fff9e84" />
+		<cassandra-db:insert doc:name="Insert to cassandra" doc:id="32b2e3af-b727-4e32-8a51-2cd52fe18188" config-ref="CassandraDB_Config" keyspaceName="${cassandra.keyspace}" table="statistics" />
+		<logger level="INFO" doc:name="End" doc:id="2a84c4a1-42bc-445d-8ee9-2ef84fff9e84" message="End [#[flow.name]] - [#[vars.trackingId]] - Data have been inserted to database"/>
 	</flow>
 	<flow name="prc-to-cass.get-data" doc:id="32d93761-ceeb-4db8-bedc-e6ad3f2c0756" >
-		<ee:transform doc:name="Set vars" doc:id="2e279ee3-5d45-478d-80e7-b39303fee6a9" >
-			<ee:message >
+		<ee:transform doc:name="Set vars" doc:id="2e279ee3-5d45-478d-80e7-b39303fee6a9">
+			<ee:message>
 			</ee:message>
-			<ee:variables >
-				<ee:set-variable variableName="country" ><![CDATA[output application/java
+			<ee:variables>
+				<ee:set-variable variableName="country"><![CDATA[output application/java
 ---
 attributes.queryParams.country]]></ee:set-variable>
-				<ee:set-variable variableName="lastDate" ><![CDATA[output application/java
+				<ee:set-variable variableName="lastDate"><![CDATA[output application/java
 var lastDays = attributes.queryParams.lastDays default 90
 ---
 (now() - ("P$(lastDays)D" as Period)) as Date as String]]></ee:set-variable>
-				<ee:set-variable variableName="lastDays" ><![CDATA[%dw 2.0
+				<ee:set-variable variableName="lastDays"><![CDATA[%dw 2.0
 output application/java
 ---
 attributes.queryParams.lastDays as Number default 90]]></ee:set-variable>
@@ -58,22 +58,22 @@ attributes.queryParams.lastDays as Number default 90]]></ee:set-variable>
 		<set-variable value='#[{
 	query: "SELECT * FROM covid.statistics WHERE country = ? AND date &gt;= ?",
 	parameters: [vars.country, vars.lastDate]
-}]' doc:name="Set Variable" doc:id="ff0d33b1-c85f-4ccf-8a2f-99a9790fe89e" variableName="dynamicQuery"/>
-		<cassandra-db:select doc:name="Select" doc:id="bf7b9531-c26a-4b1e-bf5f-4ca9fe51732e" config-ref="CassandraDB_Config" parameters="#[vars.dynamicQuery.parameters]">
+}]' doc:name="Set dynamicQuery" doc:id="ff0d33b1-c85f-4ccf-8a2f-99a9790fe89e" variableName="dynamicQuery"/>
+		<cassandra-db:select doc:name="Select from cassandra" doc:id="bf7b9531-c26a-4b1e-bf5f-4ca9fe51732e" config-ref="CassandraDB_Config" parameters="#[vars.dynamicQuery.parameters]">
 			<cassandra-db:query ><![CDATA[#[vars.dynamicQuery.query]]]></cassandra-db:query>
 		</cassandra-db:select>
-		<ee:transform doc:name="Transform Message" doc:id="19eb9c18-4a3b-4357-814f-13588645e5ff" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
+		<ee:transform doc:name="Check if data is present in DB" doc:id="19eb9c18-4a3b-4357-814f-13588645e5ff">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 var size = sizeOf(payload)
 ---
 if (size == 0 or size != vars.lastDays) 
-	lookup('prc-to-kafka.prepare-data', payload) 
+	lookup('prc-to-kafka.prepare-data', payload, 500000) 
 else
 	payload]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<logger level="INFO" doc:name="Logger" doc:id="b970b9f8-fdd3-42ff-b1c7-019bbace6fa3" />
+		<logger level="INFO" doc:name="Log response" doc:id="b970b9f8-fdd3-42ff-b1c7-019bbace6fa3" message="[#[flow.name]] - [#[vars.trackingId]] - Response to user: [#[payload]]"/>
 	</flow>
 </mule>
