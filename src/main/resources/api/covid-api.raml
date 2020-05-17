@@ -1,0 +1,26 @@
+#%RAML 1.0
+title: covid-api
+version: 1.0
+
+types:
+  country: !include datatypes/countries.raml
+
+/statistics:
+  get:
+    displayName: Get data by country for last N days
+    queryParameters:
+      country: 
+        required: true
+        type: country
+      lastDays:
+        required: false
+        type: number
+    responses:
+      200:
+        body:
+          application/json:
+            type: array
+            examples:
+              output: !include examples/output.raml
+
+      

@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:os="http://www.mulesoft.org/schema/mule/os"
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:os="http://www.mulesoft.org/schema/mule/os"
 	xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
-	xmlns:cassandra-db="http://www.mulesoft.org/schema/mule/cassandra-db" xmlns:kafka="http://www.mulesoft.org/schema/mule/kafka" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+	xmlns:cassandra-db="http://www.mulesoft.org/schema/mule/cassandra-db" xmlns:kafka="http://www.mulesoft.org/schema/mule/kafka" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/kafka http://www.mulesoft.org/schema/mule/kafka/current/mule-kafka.xsd
 http://www.mulesoft.org/schema/mule/cassandra-db http://www.mulesoft.org/schema/mule/cassandra-db/current/mule-cassandra-db.xsd
 http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
@@ -41,4 +43,31 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="08f8b279-080e-46a8-ad03-50d8dfecbfb5" >
 		<http:listener-connection host="0.0.0.0" port="8081" />
 	</http:listener-config>
+	<sub-flow name="global.get-tracking-id" doc:id="44e7a01b-ad61-4599-aaf8-59944172d289" >
+		<set-variable doc:name="Set Variable" doc:id="16f555ee-f2bc-49f3-a567-860781270c4e" variableName="trackingId" value="#[if (attributes.headers['x-transaction-id'] != null) attributes.headers['x-transaction-id'] 
+	else if  (vars.trackingId != null) vars.trackingId
+	else correlationId replace &quot;-&quot; with &quot;&quot;]"/>
+	</sub-flow>
+	<sub-flow name="global.transform-to-json-api">
+		<ee:transform doc:name="Transform Message" doc:id="03e79c34-f579-4124-a020-43c3cb2120fe" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json skipNullOn="everywhere"
+---
+{
+	"data": [{
+		"type": vars.responseTitle,
+	 	"id": vars.trackingId,
+		"attributes":
+		{
+			"dateTime": now(),
+			"runtimeVersion": mule.version,
+			"policies" : vars.policies
+		}
+	}]
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+
+    </sub-flow>
 </mule>

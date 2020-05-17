@@ -150,6 +150,21 @@ output application/json
 	</flow>
 	<flow name="get-covid-dataFlow" doc:id="32d93761-ceeb-4db8-bedc-e6ad3f2c0756" >
 		<http:listener doc:name="Listener" doc:id="3a0dac90-c05f-4026-9e22-519cc6beccac" config-ref="HTTP_Listener_config" path="/covid"/>
+		<http:request method="GET" doc:name="Request" doc:id="92751de8-d8cb-43eb-af31-5d911c4e4dec" config-ref="HTTP_Request_covid" path="/historical">
+			<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"country" : "Value"
+}]]]></http:query-params>
+		</http:request>
+		<ee:transform doc:name="Transform Message" doc:id="07ad0e72-34e8-47c0-9623-0eba1cca99b4" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload.*country distinctBy $]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
 		<ee:transform doc:name="Set vars" doc:id="2e279ee3-5d45-478d-80e7-b39303fee6a9" >
 			<ee:message >
 			</ee:message>
