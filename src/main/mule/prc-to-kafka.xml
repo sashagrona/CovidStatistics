@@ -12,7 +12,7 @@ http://www.mulesoft.org/schema/mule/kafka http://www.mulesoft.org/schema/mule/ka
 http://www.mulesoft.org/schema/mule/cassandra-db http://www.mulesoft.org/schema/mule/cassandra-db/current/mule-cassandra-db.xsd
 http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
 	<os:object-store name="Object_store" doc:name="Object store" doc:id="8c172afe-be15-4b64-9a9f-d105d573177b" config-ref="ObjectStore_Config" />
-	<sub-flow name="prc-to-kafka.prepare-data" doc:id="54f47a70-3ffd-4173-9ff8-310e4113ad86">
+	<flow name="prc-to-kafka.prepare-data" doc:id="54f47a70-3ffd-4173-9ff8-310e4113ad86">
 		<logger level="INFO" doc:name="Start" doc:id="5d7c6628-8cad-4fbe-84d8-57ed69de665e" message="START - [#[flow.name]] - [#[vars.trackingId]] - There is no required data in db, processing new request"/>
 		<http:request method="GET" doc:name="Request external api" doc:id="e17dd265-c067-4138-9ea1-f2b6c9c9665e" config-ref="HTTP_Request_covid" path="/historical/{country}" responseTimeout="${covid.timeout}">
 			<http:uri-params ><![CDATA[#[output application/java
@@ -84,7 +84,7 @@ payload.cases pluck(value, key, index) -> {
 		</ee:transform>
 		<flow-ref doc:name="prc-to-kafka.send-to-kafka" doc:id="0c90fcb3-8090-44fb-8bd5-7313defc037a" name="prc-to-kafka.send-to-kafka"/>
 		<flow-ref doc:name="prc-to-kafka.set-watermark" doc:id="d87473a1-a5ee-4118-a70f-7de99e273115" name="prc-to-kafka.set-watermark"/>
-	</sub-flow>
+	</flow>
 	<sub-flow name="prc-to-kafka.set-watermark" doc:id="a3848d85-f56f-4fc0-9895-2c1455ae2f87" >
 		<logger level="INFO" doc:name="Start" doc:id="e101fa3d-0d98-468d-af4d-1eaddde050ed" message="START [#[flow.name]] - [#[vars.trackingId]] - Setting new watermark"/>
 		<ee:transform doc:name="Set watermark" doc:id="3f6a93ec-58e2-4c79-a7bd-c9b211855edf">

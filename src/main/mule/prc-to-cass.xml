@@ -11,31 +11,8 @@ http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/cu
 	<flow name="prc-to-cass.insert-data" doc:id="fea2e817-2c86-4a62-a239-7863a06c50ae">
 		<kafka:message-listener doc:name="Message listener" doc:id="d67fa252-a714-4f50-bd98-c9d3bad3bd44" config-ref="Apache_Kafka_Consumer_configuration"/>
 		<set-payload value="#[payload]" doc:name="Set json MIME Type" doc:id="c44d30d7-4f77-464a-8c33-4f928dd640dc" mimeType="application/json"/>
-		<ee:transform doc:name="Prepare payload for INSERT" doc:id="ac10a90e-4218-4d81-840c-4d9cdee11008">
-			<ee:message>
-				<ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-	country: payload.country,
-	date: payload.date,
-	cases: {
-		total: payload.cases.total,
-		new: payload.cases.new
-	},
-	deaths: {
-		total: payload.deaths.total,
-		new: payload.deaths.new
-	},
-	recovered: {
-		total: payload.recovered.total,
-		new: payload.recovered.new
-	}
-}]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
 		<cassandra-db:insert doc:name="Insert to cassandra" doc:id="32b2e3af-b727-4e32-8a51-2cd52fe18188" config-ref="CassandraDB_Config" keyspaceName="${cassandra.keyspace}" table="statistics" />
-		<logger level="INFO" doc:name="End" doc:id="2a84c4a1-42bc-445d-8ee9-2ef84fff9e84" message="End [#[flow.name]] - [#[vars.trackingId]] - Data have been inserted to database"/>
+		<logger level="INFO" doc:name="End" doc:id="2a84c4a1-42bc-445d-8ee9-2ef84fff9e84" message="End [#[flow.name]]  - Data have been inserted to database"/>
 	</flow>
 	<flow name="prc-to-cass.get-data" doc:id="32d93761-ceeb-4db8-bedc-e6ad3f2c0756" >
 		<ee:transform doc:name="Set vars" doc:id="2e279ee3-5d45-478d-80e7-b39303fee6a9">

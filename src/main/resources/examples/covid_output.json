@@ -1,5 +1,6 @@
 [
 	{
+			"country": "Ukraine",
     		"date": "2020-04-15",
 	    	"cases": {
 	    		"total": 2055424,
@@ -15,6 +16,7 @@
 	    	}
     },
     {
+    		"country": "Ukraine",
 	    	"date": "2020-04-16",
 	   		"cases": {
 	    		"total": 2151792,
