@@ -11,7 +11,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 http://www.mulesoft.org/schema/mule/kafka http://www.mulesoft.org/schema/mule/kafka/current/mule-kafka.xsd
 http://www.mulesoft.org/schema/mule/cassandra-db http://www.mulesoft.org/schema/mule/cassandra-db/current/mule-cassandra-db.xsd
 http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
-	<os:object-store name="Object_store" doc:name="Object store" doc:id="8c172afe-be15-4b64-9a9f-d105d573177b" config-ref="ObjectStore_Config" />
+	
 	<flow name="prc-to-kafka.prepare-data" doc:id="54f47a70-3ffd-4173-9ff8-310e4113ad86">
 		<logger level="INFO" doc:name="Start" doc:id="5d7c6628-8cad-4fbe-84d8-57ed69de665e" message="START - [#[flow.name]] - [#[vars.trackingId]] - There is no required data in db, processing new request"/>
 		<http:request method="GET" doc:name="Request external api" doc:id="e17dd265-c067-4138-9ea1-f2b6c9c9665e" config-ref="HTTP_Request_covid" path="/historical/{country}" responseTimeout="${covid.timeout}">
@@ -104,7 +104,7 @@ fun contains(obj) = if(isEmpty(elementInArr(obj))) false else true
 if(contains(vars.country) and elementInArr(vars.country).date > new.date) 
 	(vars.watermark- elementInArr(vars.country)) << new
 else
-	(vars.watermark) << new
+	((vars.watermark) << new) distinctBy $
 ]]></ee:set-variable>
 			</ee:variables>
 		</ee:transform>

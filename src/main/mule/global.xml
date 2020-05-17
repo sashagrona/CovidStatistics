@@ -27,6 +27,7 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 	<os:config name="ObjectStore_Config" doc:name="ObjectStore Config" doc:id="98c95acd-cc57-4728-8c42-cd61dd4eef59" >
 		<os:connection />
 	</os:config>
+	<os:object-store name="Object_store" doc:name="Object store" doc:id="a464f0a6-e448-4188-9ab5-91364a1363e9" config-ref="ObjectStore_Config" entryTtl="1" expirationInterval="20" entryTtlUnit="HOURS"/>
 	<http:request-config name="HTTP_Request_covid" doc:name="HTTP Request configuration" doc:id="f0830f79-3130-456d-a0f4-27a455721859" basePath="/v2/">
 		<http:request-connection host="${covid.host}" port="${covid.port}" connectionIdleTimeout="${covid.timeout}"/>
 	</http:request-config>
