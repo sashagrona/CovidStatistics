@@ -12,9 +12,10 @@ http://www.mulesoft.org/schema/mule/kafka http://www.mulesoft.org/schema/mule/ka
 http://www.mulesoft.org/schema/mule/cassandra-db http://www.mulesoft.org/schema/mule/cassandra-db/current/mule-cassandra-db.xsd
 http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
 	
-	<flow name="prc-to-kafka.prepare-data" doc:id="54f47a70-3ffd-4173-9ff8-310e4113ad86">
-		<logger level="INFO" doc:name="Start" doc:id="5d7c6628-8cad-4fbe-84d8-57ed69de665e" message="START - [#[flow.name]] - [#[vars.trackingId]] - There is no required data in db, processing new request"/>
-		<http:request method="GET" doc:name="Request external api" doc:id="e17dd265-c067-4138-9ea1-f2b6c9c9665e" config-ref="HTTP_Request_covid" path="/historical/{country}" responseTimeout="${covid.timeout}">
+	<flow name="prc-to-kafka.prepare-data" doc:id="24495d38-b66a-49fe-b9c8-3ec897e39849">
+		<logger level="INFO" doc:name="Start" doc:id="4f2f8d5d-6185-4cb1-a046-6c865725b1f8" message="START - [#[flow.name]] - [#[vars.trackingId]] - There is no required data in db, processing new request"/>
+		<set-variable value="#[payload[-1].date]" doc:name="Set last db Date" doc:id="7a1f1658-0835-485d-bd40-e29bbd9d09eb" variableName="lastDate"/>
+		<http:request method="GET" doc:name="Request external api" doc:id="f551a89a-782c-4295-a75f-6389c576ba54" config-ref="HTTP_Request_covid" path="/historical/{country}" responseTimeout="${covid.timeout}">
 			<http:uri-params ><![CDATA[#[output application/java
 ---
 {
@@ -26,15 +27,14 @@ http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/cu
 	"lastdays" : vars.lastDays as Number + 1
 }]]]></http:query-params>
 		</http:request>
-		<os:retrieve doc:name="Get watermark" doc:id="73ffb174-90dd-4930-a8ef-0e2b5584230c" key="watermark" objectStore="Object_store" target="watermark">
+		<os:retrieve doc:name="Get watermark" doc:id="e31122c3-cccc-4164-941e-272701faf8ea" key="watermark" objectStore="Object_store" target="watermark">
 			<os:default-value ><![CDATA[#[[]]]]></os:default-value>
 		</os:retrieve>
-		<ee:transform doc:name="Set data" doc:id="1d555140-1eac-4f73-b366-19e05619a4b7">
+		<ee:transform doc:name="Set data" doc:id="6b5b1a21-56ae-4516-96d5-7883ea09b992">
 			<ee:message>
 				<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 fun removeFirst(object) = object filterObject((value, key, index) -> index > 0)
-
 ---
 {
 	cases: removeFirst(payload.timeline.cases),
@@ -58,7 +58,7 @@ var recovered = valueSet(payload.timeline.recovered)
 }]]></ee:set-variable>
 			</ee:variables>
 		</ee:transform>
-		<ee:transform doc:name="Prepare message for user" doc:id="a103195d-d510-4e9d-8ac0-5b1fa30c127d">
+		<ee:transform doc:name="Prepare message for user" doc:id="6356af5d-8105-4f3b-82a2-f1117c9282d1">
 			<ee:message>
 				<ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -82,12 +82,12 @@ payload.cases pluck(value, key, index) -> {
 	}]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<flow-ref doc:name="prc-to-kafka.send-to-kafka" doc:id="0c90fcb3-8090-44fb-8bd5-7313defc037a" name="prc-to-kafka.send-to-kafka"/>
-		<flow-ref doc:name="prc-to-kafka.set-watermark" doc:id="d87473a1-a5ee-4118-a70f-7de99e273115" name="prc-to-kafka.set-watermark"/>
+		<flow-ref doc:name="prc-to-kafka.send-to-kafka" doc:id="5488939f-98f9-4811-aa02-ef4aa160a399" name="prc-to-kafka.send-to-kafka"/>
+		<flow-ref doc:name="prc-to-kafka.set-watermark" doc:id="6d0813b9-9f3f-4d64-a5f6-cd45f95be233" name="prc-to-kafka.set-watermark"/>
 	</flow>
-	<sub-flow name="prc-to-kafka.set-watermark" doc:id="a3848d85-f56f-4fc0-9895-2c1455ae2f87" >
-		<logger level="INFO" doc:name="Start" doc:id="e101fa3d-0d98-468d-af4d-1eaddde050ed" message="START [#[flow.name]] - [#[vars.trackingId]] - Setting new watermark"/>
-		<ee:transform doc:name="Set watermark" doc:id="3f6a93ec-58e2-4c79-a7bd-c9b211855edf">
+	<sub-flow name="prc-to-kafka.set-watermark" doc:id="9d3e4c50-3bb8-417e-b4ec-1ff4312f3f9b" >
+		<logger level="INFO" doc:name="Start" doc:id="32ce7137-5ae0-4abb-8479-9d5b0bf26ec1" message="START [#[flow.name]] - [#[vars.trackingId]] - Setting new watermark"/>
+		<ee:transform doc:name="Set watermark" doc:id="96475215-3aa5-4203-b3cc-7d7a94a0bb24">
 			<ee:message>
 			</ee:message>
 			<ee:variables>
@@ -108,14 +108,14 @@ else
 ]]></ee:set-variable>
 			</ee:variables>
 		</ee:transform>
-		<os:store doc:name="Store new watermark" doc:id="ef23884f-0afc-4141-9768-48b6741699b8" key="watermark" objectStore="Object_store">
+		<os:store doc:name="Store new watermark" doc:id="29e13fa5-b35a-4e2e-86ae-5781478e0766" key="watermark" objectStore="Object_store">
 			<os:value><![CDATA[#[vars.watermark]]]></os:value>
 		</os:store>
-		<logger level="INFO" doc:name="End" doc:id="b20c865e-ad86-46a9-937a-827554ac58b5" message="End [#[flow.name]] - [#[vars.trackingId]] - Setting new watermark"/>
+		<logger level="INFO" doc:name="End" doc:id="f188ce11-5c7c-4def-b033-1c876346e136" message="End [#[flow.name]] - [#[vars.trackingId]] - Setting new watermark"/>
 	</sub-flow>
-	<sub-flow name="prc-to-kafka.send-to-kafka" doc:id="36fae7f7-80ea-40b8-887c-e6b30cd8cf39" >
-		<logger level="INFO" doc:name="Start" doc:id="cad2a420-f581-4e82-b136-1ff40042d1e8" message="Start [#[flow.name]] - [#[vars.trackingId]] - Sending data to Kafka"/>
-		<ee:transform doc:name="Prepare message for Kafka" doc:id="7d2f81c6-c296-4486-bed3-848910afedb5">
+	<sub-flow name="prc-to-kafka.send-to-kafka" doc:id="bf4bbfb5-ba96-4d63-ad55-cfba04828262" >
+		<logger level="INFO" doc:name="Start" doc:id="6a8fa40a-46ab-4f72-bf89-3587bee211a7" message="Start [#[flow.name]] - [#[vars.trackingId]] - Sending data to Kafka"/>
+		<ee:transform doc:name="Prepare message for Kafka" doc:id="cf211f29-cfab-4b8e-90bb-f943638cac85">
 			<ee:message>
 			</ee:message>
 			<ee:variables>
@@ -125,13 +125,16 @@ import * from dw::core::Arrays
 var element = vars.watermark filter $.country == vars.country
 var indexDate = if(!isEmpty(element)) indexOf(vars.watermark, vars.country) else null
 ---
-if(indexDate != null) payload filter $.date < vars.watermark[indexDate].date else payload]]></ee:set-variable>
+if(indexDate != null)
+ payload filter ($.date < vars.watermark[indexDate].date or $.date == (vars.lastDate as Date + |P1D|) as String)
+else 
+ payload]]></ee:set-variable>
 			</ee:variables>
 		</ee:transform>
-		<foreach doc:name="For Each" doc:id="a895ae50-9ac2-4410-b439-51979a98823e" collection="#[vars.message]">
-			<kafka:publish doc:name="Publish" doc:id="468c636e-4015-439e-826e-fe6e2f348274" config-ref="Apache_Kafka_Producer_configuration" topic="${kafka.topic}" partition="0" key="#[now()]" />
-			<logger level="INFO" doc:name="Log message" doc:id="c9a24c80-94f8-42cd-b911-a35da16421a6" message="#[vars.message]"/>
+		<foreach doc:name="For Each" doc:id="ffd8afb9-2c90-4016-880a-2ec8ce24f21b" collection="#[vars.message]">
+			<kafka:publish doc:name="Publish" doc:id="af0fabc7-a32d-4fb8-b335-3293c2519954" config-ref="Apache_Kafka_Producer_configuration" topic="${kafka.topic}" partition="0" key="#[now()]" />
+			<logger level="INFO" doc:name="Log message" doc:id="520b078a-ee09-49d1-858b-12188bbda62f" message="#[vars.message]"/>
 		</foreach>
-		<logger level="INFO" doc:name="End" doc:id="080ed0a3-e519-41f7-9fb6-d5d8f492bb52" message="End [#[flow.name]] - [#[vars.trackingId]] - Sending data to Kafka"/>
+		<logger level="INFO" doc:name="End" doc:id="161f1469-5455-4261-b040-acf4a0a5eebf" message="End [#[flow.name]] - [#[vars.trackingId]] - Sending data to Kafka"/>
 	</sub-flow>
 </mule>

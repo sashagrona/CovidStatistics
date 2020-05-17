@@ -8,14 +8,14 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 http://www.mulesoft.org/schema/mule/kafka http://www.mulesoft.org/schema/mule/kafka/current/mule-kafka.xsd
 http://www.mulesoft.org/schema/mule/cassandra-db http://www.mulesoft.org/schema/mule/cassandra-db/current/mule-cassandra-db.xsd
 http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
-	<flow name="prc-to-cass.insert-data" doc:id="fea2e817-2c86-4a62-a239-7863a06c50ae">
-		<kafka:message-listener doc:name="Message listener" doc:id="d67fa252-a714-4f50-bd98-c9d3bad3bd44" config-ref="Apache_Kafka_Consumer_configuration"/>
-		<set-payload value="#[payload]" doc:name="Set json MIME Type" doc:id="c44d30d7-4f77-464a-8c33-4f928dd640dc" mimeType="application/json"/>
-		<cassandra-db:insert doc:name="Insert to cassandra" doc:id="32b2e3af-b727-4e32-8a51-2cd52fe18188" config-ref="CassandraDB_Config" keyspaceName="${cassandra.keyspace}" table="statistics" />
-		<logger level="INFO" doc:name="End" doc:id="2a84c4a1-42bc-445d-8ee9-2ef84fff9e84" message="End [#[flow.name]]  - Data have been inserted to database"/>
+	<flow name="prc-to-cass.insert-data" doc:id="5789b85f-17c8-42dd-909a-cc0de97be0ae">
+		<kafka:message-listener doc:name="Message listener" doc:id="c2ddb7e7-b0b7-488d-860d-72d82c4c68eb" config-ref="Apache_Kafka_Consumer_configuration"/>
+		<set-payload value="#[payload]" doc:name="Set json MIME Type" doc:id="22ff3243-6c2a-4b25-8370-3e4494f91525" mimeType="application/json"/>
+		<cassandra-db:insert doc:name="Insert to cassandra" doc:id="c0c6ced1-6873-4cb4-8cc1-fe74e3f77515" config-ref="CassandraDB_Config" keyspaceName="${cassandra.keyspace}" table="statistics" />
+		<logger level="INFO" doc:name="End" doc:id="348eaae6-5683-4332-ba9d-f239b81bc201" message="End [#[flow.name]]  - Data have been inserted to database"/>
 	</flow>
-	<flow name="prc-to-cass.get-data" doc:id="32d93761-ceeb-4db8-bedc-e6ad3f2c0756" >
-		<ee:transform doc:name="Set vars" doc:id="2e279ee3-5d45-478d-80e7-b39303fee6a9">
+	<flow name="prc-to-cass.get-data" doc:id="a4c8e13e-fd5f-4ba7-ba06-0c33c0d2e542" >
+		<ee:transform doc:name="Set vars" doc:id="a30e06e6-8e80-4ebc-a048-1d915d9ca39c">
 			<ee:message>
 			</ee:message>
 			<ee:variables>
@@ -35,11 +35,11 @@ attributes.queryParams.lastDays as Number default 90]]></ee:set-variable>
 		<set-variable value='#[{
 	query: "SELECT * FROM covid.statistics WHERE country = ? AND date &gt;= ?",
 	parameters: [vars.country, vars.lastDate]
-}]' doc:name="Set dynamicQuery" doc:id="ff0d33b1-c85f-4ccf-8a2f-99a9790fe89e" variableName="dynamicQuery"/>
-		<cassandra-db:select doc:name="Select from cassandra" doc:id="bf7b9531-c26a-4b1e-bf5f-4ca9fe51732e" config-ref="CassandraDB_Config" parameters="#[vars.dynamicQuery.parameters]">
+}]' doc:name="Set dynamicQuery" doc:id="6790cad9-5497-42fe-9dde-76e475829248" variableName="dynamicQuery"/>
+		<cassandra-db:select doc:name="Select from cassandra" doc:id="089b8e70-5caf-4702-91b2-7b60ac9e8dc6" config-ref="CassandraDB_Config" parameters="#[vars.dynamicQuery.parameters]">
 			<cassandra-db:query ><![CDATA[#[vars.dynamicQuery.query]]]></cassandra-db:query>
 		</cassandra-db:select>
-		<ee:transform doc:name="Check if data is present in DB" doc:id="19eb9c18-4a3b-4357-814f-13588645e5ff">
+		<ee:transform doc:name="Check if data is present in DB" doc:id="7fbadf64-83cb-402e-8918-75037efe3101">
 			<ee:message>
 				<ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -51,6 +51,6 @@ else
 	payload]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<logger level="INFO" doc:name="Log response" doc:id="b970b9f8-fdd3-42ff-b1c7-019bbace6fa3" message="[#[flow.name]] - [#[vars.trackingId]] - Response to user: [#[payload]]"/>
+		<logger level="INFO" doc:name="Log response" doc:id="f4725121-51d9-4a2b-9788-309c5f09a694" message="[#[flow.name]] - [#[vars.trackingId]] - Response to user: [#[payload]]"/>
 	</flow>
 </mule>
