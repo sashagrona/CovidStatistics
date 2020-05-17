@@ -28,7 +28,6 @@ cassandra:
   password: "![l8O5tvyOtJflO74FRzI5qQ==]"
   cluster: "test"
   nodes: "127.0.0.1,127.0.0.2"
-  replication_factor: "1"
   
 
 kafka:
