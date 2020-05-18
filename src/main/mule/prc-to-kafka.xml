@@ -126,7 +126,7 @@ var element = vars.watermark filter $.country == vars.country
 var indexDate = if(!isEmpty(element)) indexOf(vars.watermark, vars.country) else null
 ---
 if(indexDate != null)
- payload filter ($.date < vars.watermark[indexDate].date or $.date == (vars.lastDate as Date + |P1D|) as String)
+ payload filter ($.date < vars.watermark[indexDate].date or $.date > vars.lastDate)
 else 
  payload]]></ee:set-variable>
 			</ee:variables>
